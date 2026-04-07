@@ -1,25 +1,46 @@
 {
-  "name": "ftp-deploy-network",
+  "name": "gpa-ftp-deploy",
   "displayName": "FTP Deploy (Network Drive Safe)",
-  "description": "FTP/FTPS/SFTP upload con supporto unità di rete Samba/UNC, profili multipli, Secret Storage",
+  "description": "Upload files via FTP, FTPS or SFTP directly from VS Code. Built for Windows Samba shares, mapped drives and UNC paths — with multi-profile support and OS keychain password storage.",
   "version": "1.1.0",
   "publisher": "GPAutomation",
-  "engines": { "vscode": "^1.80.0" },
+  "icon": "images/icon.png",
+  "license": "MIT",
+  "homepage": "https://gyagix.github.io/gpa-ftp-deploy",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gyagix/gpa-ftp-deploy"
+  },
+  "bugs": {
+    "url": "https://github.com/gyagix/gpa-ftp-deploy/issues"
+  },
+  "sponsor": {
+    "url": "https://buymeacoffee.com/gpautomation"
+  },
+  "keywords": [
+    "ftp", "sftp", "ftps", "upload", "deploy",
+    "network drive", "samba", "remote", "sync"
+  ],
   "categories": ["Other"],
+  "galleryBanner": {
+    "color": "#0d1117",
+    "theme": "dark"
+  },
+  "engines": { "vscode": "^1.80.0" },
   "activationEvents": ["onStartupFinished"],
   "main": "./out/extension.js",
   "contributes": {
     "commands": [
-      { "command": "ftpDeploy.selectProfile",  "title": "FTP Deploy: Seleziona profilo" },
-      { "command": "ftpDeploy.uploadFile",      "title": "FTP Deploy: Carica file corrente" },
-      { "command": "ftpDeploy.uploadFolder",    "title": "FTP Deploy: Carica cartella intera" },
-      { "command": "ftpDeploy.uploadSelected",  "title": "FTP Deploy: Carica →" },
-      { "command": "ftpDeploy.savePassword",    "title": "FTP Deploy: Salva password nel keychain" },
-      { "command": "ftpDeploy.deletePassword",  "title": "FTP Deploy: Rimuovi password dal keychain" },
-      { "command": "ftpDeploy.testConnection",  "title": "FTP Deploy: Test connessione" },
-      { "command": "ftpDeploy.showLog",         "title": "FTP Deploy: Mostra log" },
-      { "command": "ftpDeploy.openConfig",      "title": "FTP Deploy: Apri configurazione workspace" },
-      { "command": "ftpDeploy.addProfile",      "title": "FTP Deploy: Aggiungi profilo" }
+      { "command": "ftpDeploy.selectProfile",  "title": "FTP Deploy: Select profile" },
+      { "command": "ftpDeploy.uploadFile",      "title": "FTP Deploy: Upload current file" },
+      { "command": "ftpDeploy.uploadFolder",    "title": "FTP Deploy: Upload entire folder" },
+      { "command": "ftpDeploy.uploadSelected",  "title": "FTP Deploy: Upload →" },
+      { "command": "ftpDeploy.savePassword",    "title": "FTP Deploy: Save password to keychain" },
+      { "command": "ftpDeploy.deletePassword",  "title": "FTP Deploy: Remove password from keychain" },
+      { "command": "ftpDeploy.testConnection",  "title": "FTP Deploy: Test connection" },
+      { "command": "ftpDeploy.showLog",         "title": "FTP Deploy: Show log" },
+      { "command": "ftpDeploy.openConfig",      "title": "FTP Deploy: Open workspace config" },
+      { "command": "ftpDeploy.addProfile",      "title": "FTP Deploy: Add profile" }
     ],
     "menus": {
       "explorer/context": [
@@ -35,27 +56,27 @@
         "ftpDeploy.profiles": {
           "type": "object",
           "default": {},
-          "description": "Profili di connessione. Ogni chiave è il nome del profilo (es: dev, staging, prod).",
+          "description": "Connection profiles. Each key is a profile name (e.g. dev, staging, prod).",
           "additionalProperties": {
             "type": "object",
             "required": ["host", "user", "remotePath"],
             "properties": {
-              "protocol":           { "type": "string", "enum": ["ftp","ftps","sftp"], "default": "ftp" },
-              "host":               { "type": "string" },
-              "port":               { "type": "number" },
-              "user":               { "type": "string" },
-              "password":           { "type": "string", "description": "Sconsigliato: usare 'Salva password nel keychain'" },
-              "remotePath":         { "type": "string" },
-              "localRoot":          { "type": "string", "description": "Accetta Z:\\path o \\\\server\\share\\path. Vuoto = workspace root." },
-              "uploadOnSave":       { "type": "boolean", "default": true },
-              "passive":            { "type": "boolean", "default": true },
-              "ignore":             { "type": "array", "items": { "type": "string" }, "default": [".git","node_modules",".vs","*.user","Thumbs.db"] },
-              "timeout":            { "type": "number", "default": 15000 },
-              "showNotifications":  { "type": "boolean", "default": true },
-              "ftpsImplicit":       { "type": "boolean", "default": false, "description": "true = porta 990; false = STARTTLS porta 21" },
-              "rejectUnauthorized": { "type": "boolean", "default": true, "description": "false solo per certificati self-signed" },
-              "privateKeyPath":     { "type": "string", "description": "[SFTP] Path assoluto alla chiave privata SSH" },
-              "passphrase":         { "type": "string", "description": "[SFTP] Passphrase della chiave privata SSH" }
+              "protocol":           { "type": "string", "enum": ["ftp","ftps","sftp"], "default": "ftp", "description": "Transfer protocol." },
+              "host":               { "type": "string", "description": "Remote server hostname or IP." },
+              "port":               { "type": "number", "description": "Remote port. Defaults: FTP/FTPS=21, SFTP=22." },
+              "user":               { "type": "string", "description": "Login username." },
+              "password":           { "type": "string", "description": "Not recommended — use 'Save password to keychain' instead." },
+              "remotePath":         { "type": "string", "description": "Absolute path on the remote server." },
+              "localRoot":          { "type": "string", "description": "Local root folder. Accepts Z:\\path or \\\\server\\share\\path. Leave empty to use workspace root." },
+              "uploadOnSave":       { "type": "boolean", "default": true, "description": "Automatically upload the active file on save." },
+              "passive":            { "type": "boolean", "default": true, "description": "[FTP] Use passive mode." },
+              "ignore":             { "type": "array", "items": { "type": "string" }, "default": [".git","node_modules",".vs","*.user","Thumbs.db"], "description": "Glob patterns to exclude from upload." },
+              "timeout":            { "type": "number", "default": 15000, "description": "Connection timeout in milliseconds." },
+              "showNotifications":  { "type": "boolean", "default": true, "description": "Show VS Code notifications on upload." },
+              "ftpsImplicit":       { "type": "boolean", "default": false, "description": "[FTPS] true = implicit TLS port 990; false = STARTTLS port 21." },
+              "rejectUnauthorized": { "type": "boolean", "default": true, "description": "[FTPS] Set to false only for self-signed certificates." },
+              "privateKeyPath":     { "type": "string", "description": "[SFTP] Absolute path to the SSH private key file." },
+              "passphrase":         { "type": "string", "description": "[SFTP] Passphrase for the SSH private key." }
             }
           }
         }

@@ -5,8 +5,6 @@
 [![VS Code Marketplace](https://img.shields.io/visual-studio-marketplace/v/GPAutomation.gpa-ftp-deploy?label=Marketplace&logo=visualstudiocode&color=00c9a7)](https://marketplace.visualstudio.com/items?itemName=GPAutomation.gpa-ftp-deploy)
 [![Downloads](https://img.shields.io/visual-studio-marketplace/d/GPAutomation.gpa-ftp-deploy?color=0084ff)](https://marketplace.visualstudio.com/items?itemName=GPAutomation.gpa-ftp-deploy)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-☕-FFDD00)](https://buymeacoffee.com/gyagix)
-
 ---
 
 ## Why this extension?
@@ -201,14 +199,6 @@ Pull requests and issues are welcome!
 3. Commit: `git commit -m 'feat: add my feature'`
 4. Push: `git push origin feature/my-feature`
 5. Open a Pull Request
-
----
-
-## Support the project
-
-If this extension saves you time, consider buying me a coffee ☕
-
-[![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-FFDD00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black)](https://buymeacoffee.com/gyagix)
 
 ---
 

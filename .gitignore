@@ -6,3 +6,5 @@ out/
 *.zip
 Claude.*
 *.code-workspace
+.gitignore
+*.svg
