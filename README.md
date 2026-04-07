@@ -5,6 +5,9 @@
 [![VS Code Marketplace](https://img.shields.io/visual-studio-marketplace/v/GPAutomation.gpa-ftp-deploy?label=Marketplace&logo=visualstudiocode&color=00c9a7)](https://marketplace.visualstudio.com/items?itemName=GPAutomation.gpa-ftp-deploy)
 [![Downloads](https://img.shields.io/visual-studio-marketplace/d/GPAutomation.gpa-ftp-deploy?color=0084ff)](https://marketplace.visualstudio.com/items?itemName=GPAutomation.gpa-ftp-deploy)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![GitHub](https://img.shields.io/badge/GitHub-gyagix%2Fgpa--ftp--deploy-181717?logo=github)](https://github.com/gyagix/gpa-ftp-deploy)
+[![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-%E2%98%95-FFDD00)](https://buymeacoffee.com/gpautomation)
+
 ---
 
 ## Why this extension?
