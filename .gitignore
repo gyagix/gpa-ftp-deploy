@@ -1,8 +1,0 @@
-Claude.local.md
-node_modules/
-out/
-.claude/
-*.vsix
-*.zip
-Claude.*
-*.code-workspace
