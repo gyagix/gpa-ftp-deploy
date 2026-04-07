@@ -1,0 +1,80 @@
+{
+  "name": "ftp-deploy-network",
+  "displayName": "FTP Deploy (Network Drive Safe)",
+  "description": "FTP/FTPS/SFTP upload con supporto unità di rete Samba/UNC, profili multipli, Secret Storage",
+  "version": "1.1.0",
+  "publisher": "GPAutomation",
+  "engines": { "vscode": "^1.80.0" },
+  "categories": ["Other"],
+  "activationEvents": ["onStartupFinished"],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      { "command": "ftpDeploy.selectProfile",  "title": "FTP Deploy: Seleziona profilo" },
+      { "command": "ftpDeploy.uploadFile",      "title": "FTP Deploy: Carica file corrente" },
+      { "command": "ftpDeploy.uploadFolder",    "title": "FTP Deploy: Carica cartella intera" },
+      { "command": "ftpDeploy.uploadSelected",  "title": "FTP Deploy: Carica →" },
+      { "command": "ftpDeploy.savePassword",    "title": "FTP Deploy: Salva password nel keychain" },
+      { "command": "ftpDeploy.deletePassword",  "title": "FTP Deploy: Rimuovi password dal keychain" },
+      { "command": "ftpDeploy.testConnection",  "title": "FTP Deploy: Test connessione" },
+      { "command": "ftpDeploy.showLog",         "title": "FTP Deploy: Mostra log" },
+      { "command": "ftpDeploy.openConfig",      "title": "FTP Deploy: Apri configurazione workspace" },
+      { "command": "ftpDeploy.addProfile",      "title": "FTP Deploy: Aggiungi profilo" }
+    ],
+    "menus": {
+      "explorer/context": [
+        { "command": "ftpDeploy.uploadSelected", "group": "navigation" }
+      ],
+      "editor/context": [
+        { "command": "ftpDeploy.uploadFile", "group": "navigation" }
+      ]
+    },
+    "configuration": {
+      "title": "FTP Deploy",
+      "properties": {
+        "ftpDeploy.profiles": {
+          "type": "object",
+          "default": {},
+          "description": "Profili di connessione. Ogni chiave è il nome del profilo (es: dev, staging, prod).",
+          "additionalProperties": {
+            "type": "object",
+            "required": ["host", "user", "remotePath"],
+            "properties": {
+              "protocol":           { "type": "string", "enum": ["ftp","ftps","sftp"], "default": "ftp" },
+              "host":               { "type": "string" },
+              "port":               { "type": "number" },
+              "user":               { "type": "string" },
+              "password":           { "type": "string", "description": "Sconsigliato: usare 'Salva password nel keychain'" },
+              "remotePath":         { "type": "string" },
+              "localRoot":          { "type": "string", "description": "Accetta Z:\\path o \\\\server\\share\\path. Vuoto = workspace root." },
+              "uploadOnSave":       { "type": "boolean", "default": true },
+              "passive":            { "type": "boolean", "default": true },
+              "ignore":             { "type": "array", "items": { "type": "string" }, "default": [".git","node_modules",".vs","*.user","Thumbs.db"] },
+              "timeout":            { "type": "number", "default": 15000 },
+              "showNotifications":  { "type": "boolean", "default": true },
+              "ftpsImplicit":       { "type": "boolean", "default": false, "description": "true = porta 990; false = STARTTLS porta 21" },
+              "rejectUnauthorized": { "type": "boolean", "default": true, "description": "false solo per certificati self-signed" },
+              "privateKeyPath":     { "type": "string", "description": "[SFTP] Path assoluto alla chiave privata SSH" },
+              "passphrase":         { "type": "string", "description": "[SFTP] Passphrase della chiave privata SSH" }
+            }
+          }
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.80.0",
+    "@types/node": "^18.0.0",
+    "@types/ssh2-sftp-client": "^9.0.0",
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "basic-ftp": "^5.0.5",
+    "ssh2-sftp-client": "^9.1.0"
+  }
+}
