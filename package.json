@@ -2,7 +2,7 @@
   "name": "gpa-ftp-deploy",
   "displayName": "FTP Deploy (Network Drive Safe)",
   "description": "Upload files via FTP, FTPS or SFTP directly from VS Code. Built for Windows Samba shares, mapped drives and UNC paths — with multi-profile support and OS keychain password storage.",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "publisher": "GPAutomation",
   "icon": "images/icon.png",
   "license": "MIT",

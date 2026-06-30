@@ -12,6 +12,5 @@ ftp-deploy.zip
 *.code-workspace
 src/**
 tsconfig.json
-node_modules/**
 docs/**
 images/icon.xcf
