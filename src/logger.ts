@@ -17,6 +17,10 @@ export class Logger {
     this.channel.show(true);
   }
 
+  warn(msg: string): void {
+    this._log('WARN', msg);
+  }
+
   debug(msg: string): void {
     this._log('DEBUG', msg);
   }

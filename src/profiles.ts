@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { FtpConfig, normalizeLocalPath } from './config';
+import { Logger } from './logger';
 
 export interface ProfileSettings {
   protocol?: 'ftp' | 'ftps' | 'sftp';
@@ -29,23 +30,49 @@ export interface ProfileMap {
  * Legge tutti i profili da ftpDeploy.profiles nel settings.json.
  * Se non ci sono profili, crea un profilo "default" dalle impostazioni flat legacy.
  */
-export function loadProfiles(): ProfileMap {
+const FALLBACK_READ_TIMEOUT_MS = 3000;
+
+/**
+ * Legge un file con un timeout, cosi uno share di rete irraggiungibile non
+ * blocca il fallback all'infinito (fs.readFileSync bloccherebbe l'extension host).
+ */
+function readFileWithTimeout(filePath: string, timeoutMs: number): Promise<string> {
+  let timer: NodeJS.Timeout;
+  const timeout = new Promise<string>((_, reject) => {
+    timer = setTimeout(() => reject(new Error(`Timed out after ${timeoutMs}ms reading ${filePath}`)), timeoutMs);
+  });
+  return Promise.race([
+    require('fs/promises').readFile(filePath, 'utf8'),
+    timeout,
+  ]).finally(() => clearTimeout(timer));
+}
+
+export async function loadProfiles(logger?: Logger): Promise<ProfileMap> {
   // Prima prova via API VS Code
   const cfg = vscode.workspace.getConfiguration('ftpDeploy');
   const profiles = cfg.get<ProfileMap>('profiles');
 
-  if (profiles && Object.keys(profiles).length > 0) {
-    return profiles;
+  // Non basta che esistano chiavi: su drive di rete la cache di getConfiguration()
+  // può restare stale (watcher non affidabile su UNC/mapped drive) e restituire
+  // un profilo con valori vuoti/vecchi. Valida che host sia valorizzato prima di fidarsi.
+  const isValid = !!profiles
+    && Object.keys(profiles).length > 0
+    && Object.values(profiles).every((p) => !!p.host);
+
+  if (isValid) {
+    return profiles!;
   }
 
-  // Fallback: leggi settings.json direttamente (aggira bug VS Code con additionalProperties)
+  // Fallback: leggi settings.json direttamente (aggira bug VS Code con additionalProperties
+  // e con la cache stale su drive di rete). Lettura async + timeout: uno share di rete
+  // caduto non deve bloccare l'extension host, e un solo tentativo senza retry.
   try {
     const wsFolders = vscode.workspace.workspaceFolders;
     if (wsFolders && wsFolders.length > 0) {
       const settingsPath = require('path').join(
         wsFolders[0].uri.fsPath, '.vscode', 'settings.json'
       );
-      const raw = require('fs').readFileSync(settingsPath, 'utf8');
+      const raw = await readFileWithTimeout(settingsPath, FALLBACK_READ_TIMEOUT_MS);
       // Rimuovi commenti // prima del parse
       const cleaned = raw.replace(/\/\/[^\n]*/g, '').replace(/\/\*[\s\S]*?\*\//g, '');
       const parsed = JSON.parse(cleaned);
@@ -54,8 +81,8 @@ export function loadProfiles(): ProfileMap {
         return directProfiles as ProfileMap;
       }
     }
-  } catch {
-    // ignora errori di lettura file
+  } catch (e) {
+    logger?.error(`Failed to read .vscode/settings.json directly: ${e}`);
   }
 
   // Fallback legacy: config flat
@@ -133,7 +160,7 @@ export class ProfileStatusBar {
       100
     );
     this.item.command = 'ftpDeploy.selectProfile';
-    this.item.tooltip = 'FTP Deploy: clicca per cambiare profilo';
+    this.item.tooltip = 'FTP Deploy: click to change profile';
     this.update('default');
     this.item.show();
   }

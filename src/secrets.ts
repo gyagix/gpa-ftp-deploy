@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { Logger } from './logger';
 
 /**
  * Chiave usata nel Secret Storage per ogni profilo.
@@ -51,8 +52,8 @@ export async function promptAndSavePassword(
   host: string
 ): Promise<string | undefined> {
   const password = await vscode.window.showInputBox({
-    title: `FTP Deploy — Password per profilo "${profileName}"`,
-    prompt: `Inserisci la password per ${host} (verrà salvata nel keychain di sistema)`,
+    title: `FTP Deploy — Password for profile "${profileName}"`,
+    prompt: `Enter the password for ${host} (will be saved to the OS keychain)`,
     password: true,
     ignoreFocusOut: true,
   });
@@ -76,7 +77,8 @@ export async function resolvePassword(
   context: vscode.ExtensionContext,
   profileName: string,
   host: string,
-  passwordInSettings: string
+  passwordInSettings: string,
+  logger?: Logger
 ): Promise<string | null> {
   // Prima cerca nel keychain
   const stored = await loadPassword(context, profileName);
@@ -84,16 +86,17 @@ export async function resolvePassword(
 
   // Fallback: password in chiaro nel settings (deprecato)
   if (passwordInSettings) {
+    logger?.warn(`Password for profile "${profileName}" found in plaintext settings.json, consider migrating to keychain`);
     vscode.window.showWarningMessage(
-      `FTP Deploy: la password del profilo "${profileName}" è in chiaro nel settings.json. ` +
-      `Usa il comando "FTP Deploy: Salva password nel keychain" per migrare.`,
-      'Migra ora'
+      `FTP Deploy: the password for profile "${profileName}" is in plaintext in settings.json. ` +
+      `Use the "FTP Deploy: Save password to keychain" command to migrate it.`,
+      'Migrate now'
     ).then(async (choice) => {
-      if (choice === 'Migra ora') {
+      if (choice === 'Migrate now') {
         await savePassword(context, profileName, passwordInSettings);
         vscode.window.showInformationMessage(
-          `Password del profilo "${profileName}" spostata nel keychain. ` +
-          `Puoi rimuovere "ftpDeploy.password" dal settings.json.`
+          `Password for profile "${profileName}" moved to keychain. ` +
+          `You can remove "ftpDeploy.password" from settings.json.`
         );
       }
     });

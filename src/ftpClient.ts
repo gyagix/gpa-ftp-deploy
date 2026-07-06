@@ -26,7 +26,7 @@ export function localToRemote(
 
   if (relative.startsWith('..')) {
     throw new Error(
-      `Il file "${localFile}" è fuori dalla cartella radice "${localRoot}"`
+      `File "${localFile}" is outside root folder "${localRoot}"`
     );
   }
 
@@ -73,7 +73,7 @@ export class FtpDeployClient {
     }
 
     const proto = isFtps ? 'FTPS' : 'FTP';
-    this.logger.info(`${proto} connesso a ${cfg.host}:${cfg.port}`);
+    this.logger.info(`${proto} connected to ${cfg.host}:${cfg.port}`);
   }
 
   close(): void {
@@ -126,7 +126,7 @@ export class FtpDeployClient {
     try {
       entries = fs.readdirSync(currentLocal, { withFileTypes: true });
     } catch (e) {
-      this.logger.error(`Impossibile leggere cartella: ${currentLocal}: ${e}`);
+      this.logger.error(`Failed to read directory: ${currentLocal}: ${e}`);
       stats.errors++;
       return;
     }
@@ -148,7 +148,7 @@ export class FtpDeployClient {
           await this.uploadFile(localFull, remoteDest);
           stats.uploaded++;
         } catch (e) {
-          this.logger.error(`Errore upload ${localFull}: ${e}`);
+          this.logger.error(`Upload error ${localFull}: ${e}`);
           stats.errors++;
         }
       }

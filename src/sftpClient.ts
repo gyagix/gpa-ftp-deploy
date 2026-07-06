@@ -40,7 +40,7 @@ export class SftpDeployClient {
     }
 
     await this.client.connect(opts);
-    this.logger.info(`SFTP connesso a ${cfg.host}:${cfg.port || 22}`);
+    this.logger.info(`SFTP connected to ${cfg.host}:${cfg.port || 22}`);
   }
 
   close(): void {
@@ -76,7 +76,7 @@ export class SftpDeployClient {
     try {
       entries = fs.readdirSync(currentLocal, { withFileTypes: true });
     } catch (e) {
-      this.logger.error(`Impossibile leggere cartella: ${currentLocal}: ${e}`);
+      this.logger.error(`Failed to read directory: ${currentLocal}: ${e}`);
       stats.errors++;
       return;
     }
@@ -98,7 +98,7 @@ export class SftpDeployClient {
           await this.uploadFile(localFull, remoteDest);
           stats.uploaded++;
         } catch (e) {
-          this.logger.error(`Errore upload ${localFull}: ${e}`);
+          this.logger.error(`Upload error ${localFull}: ${e}`);
           stats.errors++;
         }
       }

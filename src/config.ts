@@ -96,8 +96,8 @@ export function getConfig(): FtpConfig {
 }
 
 export function validate(cfg: FtpConfig): string | null {
-  if (!cfg.host) return 'ftpDeploy.host non configurato';
-  if (!cfg.user) return 'ftpDeploy.user non configurato';
-  if (!cfg.localRoot) return 'Impossibile determinare la cartella locale radice';
+  if (!cfg.host) return 'ftpDeploy.host not configured';
+  if (!cfg.user) return 'ftpDeploy.user not configured';
+  if (!cfg.localRoot) return 'Unable to determine local root folder';
   return null;
 }
