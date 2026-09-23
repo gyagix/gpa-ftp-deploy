@@ -6,7 +6,7 @@ import { FtpConfig } from './config';
 import { FtpDeployClient, localToRemote, UploadStats } from './ftpClient';
 import { Logger } from './logger';
 import { resolvePassword, promptAndSavePassword, deletePassword } from './secrets';
-import { loadProfiles, profileToConfig, ProfileStatusBar } from './profiles';
+import { loadProfiles, profileToConfig, ProfileStatusBar, ProfileSettings } from './profiles';
 
 type IDeployClient = {
   connect(cfg: FtpConfig): Promise<void>;
@@ -91,18 +91,24 @@ export function activate(context: vscode.ExtensionContext) {
   });
 
   // ── Carica intera cartella ──────────────────────────────────────────────────
-  const uploadFolderCmd = vscode.commands.registerCommand('ftpDeploy.uploadFolder', async () => {
-    const cfg = await resolveActiveConfig();
-    if (!cfg) return;
+  const uploadFolderCmd = vscode.commands.registerCommand(
+    'ftpDeploy.uploadFolder',
+    async (args?: { profile?: string; skipConfirm?: boolean }) => {
+      const cfg = await resolveActiveConfig(args?.profile);
+      if (!cfg) return;
 
-    const confirm = await vscode.window.showWarningMessage(
-      `Upload the ENTIRE folder "${cfg.localRoot}" to ${cfg.host}${cfg.remotePath}?\n[profile: ${statusBar.active}]`,
-      { modal: true },
-      'Yes, upload all'
-    );
-    if (confirm !== 'Yes, upload all') return;
-    await runUploadDirectory(cfg.localRoot, cfg);
-  });
+      const skipConfirm = args?.skipConfirm === true || cfg.confirmBeforeUpload === false;
+      if (!skipConfirm) {
+        const confirm = await vscode.window.showWarningMessage(
+          `Upload the ENTIRE folder "${cfg.localRoot}" to ${cfg.host}${cfg.remotePath}?\n[profile: ${args?.profile ?? statusBar.active}]`,
+          { modal: true },
+          'Yes, upload all'
+        );
+        if (confirm !== 'Yes, upload all') return;
+      }
+      await runUploadDirectory(cfg.localRoot, cfg);
+    }
+  );
 
   // ── Tasto destro nel file explorer ─────────────────────────────────────────
   const uploadSelectedCmd = vscode.commands.registerCommand(
@@ -392,7 +398,7 @@ export function deactivate() {}
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-async function resolveActiveConfig(): Promise<FtpConfig | null> {
+async function resolveActiveConfig(profileOverride?: string): Promise<FtpConfig | null> {
   const profiles = await loadProfiles(logger);
   const names = Object.keys(profiles);
 
@@ -400,6 +406,15 @@ async function resolveActiveConfig(): Promise<FtpConfig | null> {
     logger.error('No profiles configured in ftpDeploy.profiles');
     vscode.window.showErrorMessage('FTP Deploy: no profiles configured in ftpDeploy.profiles');
     return null;
+  }
+
+  if (profileOverride) {
+    if (!profiles[profileOverride]) {
+      logger.error(`Profile "${profileOverride}" not found`);
+      vscode.window.showErrorMessage(`FTP Deploy: profile "${profileOverride}" not found`);
+      return null;
+    }
+    return finalizeConfig(profileOverride, profiles[profileOverride]);
   }
 
   let profileName = statusBar.active;
@@ -413,8 +428,10 @@ async function resolveActiveConfig(): Promise<FtpConfig | null> {
     logger.info(`Profile "${previousProfile}" not found, using "${profileName}"`);
   }
 
-  const profile = profiles[profileName];
+  return finalizeConfig(profileName, profiles[profileName]);
+}
 
+async function finalizeConfig(profileName: string, profile: ProfileSettings): Promise<FtpConfig | null> {
   const password = await resolvePassword(
     extensionContext,
     profileName,

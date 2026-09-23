@@ -441,6 +441,14 @@
 }</pre>
       </div>
     </div>
+
+    <p style="color:var(--muted);margin-top:1rem;line-height:1.7;">
+      <code style="font-family:'JetBrains Mono',monospace;font-size:0.85rem;background:var(--code-bg);border:1px solid var(--border);border-radius:3px;padding:0.1rem 0.4rem;color:var(--accent)">Upload Entire Folder</code>
+      can also be triggered from a task/script with an explicit profile —
+      <code style="font-family:'JetBrains Mono',monospace;font-size:0.85rem;background:var(--code-bg);border:1px solid var(--border);border-radius:3px;padding:0.1rem 0.4rem;color:var(--accent)">executeCommand('ftpDeploy.uploadFolder', { profile: 'prod' })</code>.
+      Add <code style="font-family:'JetBrains Mono',monospace;font-size:0.85rem;background:var(--code-bg);border:1px solid var(--border);border-radius:3px;padding:0.1rem 0.4rem;color:var(--accent)">"confirmBeforeUpload": false</code>
+      to a profile to skip the confirmation dialog for automation.
+    </p>
   </section>
 
   <hr class="divider" />

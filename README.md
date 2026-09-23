@@ -98,6 +98,32 @@ and add your profiles under `.vscode/settings.json`:
 }
 ```
 
+### Automation / task invocation
+
+`FTP Deploy: Upload Entire Folder` can be triggered programmatically (e.g. from a
+build task) with an explicit profile, bypassing the profile picker:
+
+```js
+vscode.commands.executeCommand('ftpDeploy.uploadFolder', { profile: 'prod' });
+```
+
+By default it still shows the confirmation dialog. To skip it, either pass
+`skipConfirm: true` in the same call, or set `confirmBeforeUpload: false` on
+the profile (recommended — keeps automation profiles self-contained):
+
+```jsonc
+"deploy-automation": {
+  "protocol": "sftp",
+  "host": "prod.example.com",
+  "user": "deploy",
+  "remotePath": "/var/www/prod",
+  "confirmBeforeUpload": false   // no dialog when invoked from a task
+}
+```
+
+Interactive use (Command Palette / context menu) is unaffected unless the
+active profile itself has `confirmBeforeUpload: false`.
+
 ### Accepted `localRoot` formats
 
 | Format | Example |

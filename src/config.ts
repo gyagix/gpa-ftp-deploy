@@ -10,6 +10,7 @@ export interface FtpConfig {
   remotePath: string;
   localRoot: string;
   uploadOnSave: boolean;
+  confirmBeforeUpload: boolean;
   ignore: string[];
   passive: boolean;
   timeout: number;
@@ -84,6 +85,7 @@ export function getConfig(): FtpConfig {
     remotePath: cfg.get<string>('remotePath', '/').replace(/\\/g, '/'),
     localRoot,
     uploadOnSave: cfg.get<boolean>('uploadOnSave', true),
+    confirmBeforeUpload: cfg.get<boolean>('confirmBeforeUpload', true),
     ignore: cfg.get<string[]>('ignore', ['.git', 'node_modules', '.vs']),
     passive: cfg.get<boolean>('passive', true),
     timeout: cfg.get<number>('timeout', 15000),

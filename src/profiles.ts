@@ -12,6 +12,7 @@ export interface ProfileSettings {
   remotePath: string;
   localRoot?: string;
   uploadOnSave?: boolean;
+  confirmBeforeUpload?: boolean;
   ignore?: string[];
   passive?: boolean;
   timeout?: number;
@@ -152,6 +153,7 @@ export async function loadProfiles(logger?: Logger): Promise<ProfileMap> {
     remotePath: cfg.get<string>('remotePath', '/'),
     localRoot: cfg.get<string>('localRoot', ''),
     uploadOnSave: cfg.get<boolean>('uploadOnSave', true),
+    confirmBeforeUpload: cfg.get<boolean>('confirmBeforeUpload', true),
     ignore: cfg.get<string[]>('ignore', ['.git', 'node_modules', '.vs', '*.user']),
     passive: cfg.get<boolean>('passive', true),
     timeout: cfg.get<number>('timeout', 15000),
@@ -192,6 +194,7 @@ export function profileToConfig(
     remotePath: (p.remotePath ?? '/').replace(/\\/g, '/'),
     localRoot,
     uploadOnSave: p.uploadOnSave ?? true,
+    confirmBeforeUpload: p.confirmBeforeUpload ?? true,
     ignore: p.ignore ?? ['.git', 'node_modules', '.vs', '*.user'],
     passive: p.passive ?? true,
     timeout: p.timeout ?? 15000,
